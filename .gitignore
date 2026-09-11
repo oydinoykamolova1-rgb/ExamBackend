@@ -1,0 +1,15 @@
+# .NET
+**/bin/
+**/obj/
+*.db
+*.db-shm
+*.db-wal
+appsettings.Development.json
+.vs/
+.vscode/
+
+# Node
+**/node_modules/
+**/dist/
+.DS_Store
+*.log
