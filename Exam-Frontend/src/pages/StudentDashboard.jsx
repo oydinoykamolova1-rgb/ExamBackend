@@ -102,7 +102,7 @@ export default function StudentDashboard({ onStartExam }) {
                 style={{ width: '100%' }}
               >
                 <Play size={18} />
-                <span>Start Exam ({exam.questionsCount} Questions)</span>
+                <span>Start Exam ({exam.questionsCount ?? (exam.questions ? exam.questions.length : 0)} Questions)</span>
               </button>
             </div>
           ))}

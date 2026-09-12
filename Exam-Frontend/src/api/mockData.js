@@ -183,22 +183,16 @@ export function handleMockRequest(endpoint, options = {}) {
     const users = getStoredUsers();
     const user = users.find(u => u.email.toLowerCase() === body.email.toLowerCase() && u.password === body.password);
     
-    // Support default passwords if user exists
-    const defaultPasswords = {
-      'admin@exam.com': 'Admin123!',
-      'teacher@exam.com': 'Teacher123!',
-      'sarah.teacher@exam.com': 'Teacher123!',
-      'student@exam.com': 'Student123!',
-      'maria.student@exam.com': 'Student123!',
-      'david.student@exam.com': 'Student123!'
+    const defaultUsers = {
+      'admin@exam.com': { id: 1, fullName: 'System Admin', email: 'admin@exam.com', role: 'Admin' },
+      'teacher@exam.com': { id: 2, fullName: 'John Teacher', email: 'teacher@exam.com', role: 'Teacher' },
+      'sarah.teacher@exam.com': { id: 3, fullName: 'Prof. Sarah Jenkins', email: 'sarah.teacher@exam.com', role: 'Teacher' },
+      'student@exam.com': { id: 4, fullName: 'Alex Student', email: 'student@exam.com', role: 'Student' },
+      'maria.student@exam.com': { id: 5, fullName: 'Maria Garcia', email: 'maria.student@exam.com', role: 'Student' },
+      'david.student@exam.com': { id: 6, fullName: 'David Chen', email: 'david.student@exam.com', role: 'Student' }
     };
 
-    const targetUser = user || (defaultPasswords[body.email.toLowerCase()] && body.password === defaultPasswords[body.email.toLowerCase()] ? {
-      id: 4,
-      fullName: body.email.split('@')[0],
-      email: body.email,
-      role: body.email.includes('admin') ? 'Admin' : body.email.includes('teacher') ? 'Teacher' : 'Student'
-    } : null);
+    const targetUser = user || defaultUsers[body.email.toLowerCase()];
 
     if (!targetUser) {
       throw new Error('Invalid email or password');
@@ -244,26 +238,20 @@ export function handleMockRequest(endpoint, options = {}) {
     };
   }
 
-  // Exams: GET active exams
-  if (endpoint === '/exams' && method === 'GET') {
-    const exams = getStoredExams();
-    return exams.filter(e => e.isActive);
-  }
-
-  // Exams: GET my created
+  // Exams: GET my created (MUST BE CHECKED BEFORE /exams/:id)
   if (endpoint === '/exams/my-created' && method === 'GET') {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const exams = getStoredExams();
-    return exams.filter(e => e.createdById === currentUser.userId);
+    return exams.filter(e => e.createdById === currentUser.userId || currentUser.role === 'Admin');
   }
 
-  // Exams: GET by ID
-  if (endpoint.startsWith('/exams/') && method === 'GET') {
-    const id = parseInt(endpoint.split('/')[2], 10);
+  // Exams: GET active exams
+  if (endpoint === '/exams' && method === 'GET') {
     const exams = getStoredExams();
-    const exam = exams.find(e => e.id === id);
-    if (!exam) throw new Error('Exam not found');
-    return exam;
+    return exams.filter(e => e.isActive).map(e => ({
+      ...e,
+      questionsCount: e.questions ? e.questions.length : 0
+    }));
   }
 
   // Exams: Create
@@ -284,6 +272,25 @@ export function handleMockRequest(endpoint, options = {}) {
     exams.push(newExam);
     saveStoredExams(exams);
     return newExam;
+  }
+
+  // Exams: GET by numeric ID
+  const examIdMatch = endpoint.match(/^\/exams\/(\d+)$/);
+  if (examIdMatch && method === 'GET') {
+    const id = parseInt(examIdMatch[1], 10);
+    const exams = getStoredExams();
+    const exam = exams.find(e => e.id === id);
+    if (!exam) throw new Error('Exam not found');
+    return exam;
+  }
+
+  // Exams: DELETE by numeric ID
+  if (examIdMatch && method === 'DELETE') {
+    const id = parseInt(examIdMatch[1], 10);
+    let exams = getStoredExams();
+    exams = exams.filter(e => e.id !== id);
+    saveStoredExams(exams);
+    return { message: 'Exam deleted successfully' };
   }
 
   // Questions: Add question
@@ -307,6 +314,20 @@ export function handleMockRequest(endpoint, options = {}) {
     return newQ;
   }
 
+  // Questions: Delete question by numeric ID
+  const questionIdMatch = endpoint.match(/^\/questions\/(\d+)$/);
+  if (questionIdMatch && method === 'DELETE') {
+    const qId = parseInt(questionIdMatch[1], 10);
+    const exams = getStoredExams();
+    exams.forEach(exam => {
+      if (exam.questions) {
+        exam.questions = exam.questions.filter(q => q.id !== qId);
+      }
+    });
+    saveStoredExams(exams);
+    return { message: 'Question deleted successfully' };
+  }
+
   // Results: Submit
   if (endpoint === '/results/submit' && method === 'POST') {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -319,13 +340,13 @@ export function handleMockRequest(endpoint, options = {}) {
     if (exam && exam.questions) {
       exam.questions.forEach(q => {
         totalPoints += q.points;
-        const studentAns = body.answers.find(a => a.questionId === q.id);
+        const studentAns = body.answers ? body.answers.find(a => a.questionId === q.id) : null;
         if (studentAns) {
-          const selectedOptionIds = studentAns.selectedOptionIds || [];
-          const correctOptionIds = q.answers.filter(ans => ans.isCorrect).map(ans => ans.id);
+          const selectedAnswerIds = (studentAns.selectedAnswerIds || studentAns.selectedOptionIds || []).map(String);
+          const correctOptionIds = q.answers.filter(ans => ans.isCorrect).map(ans => String(ans.id));
           
-          const isMatch = selectedOptionIds.length === correctOptionIds.length &&
-            selectedOptionIds.every(id => correctOptionIds.includes(id));
+          const isMatch = selectedAnswerIds.length === correctOptionIds.length &&
+            selectedAnswerIds.every(id => correctOptionIds.includes(id));
           
           if (isMatch) {
             earnedPoints += q.points;
@@ -342,7 +363,7 @@ export function handleMockRequest(endpoint, options = {}) {
       examId: body.examId,
       examTitle: exam ? exam.title : "Exam",
       studentId: currentUser.userId || 4,
-      studentName: currentUser.fullName || "Student",
+      studentName: currentUser.fullName || "Alex Student",
       score: earnedPoints,
       totalPoints: totalPoints,
       percentage: Math.round(percentage * 10) / 10,
@@ -363,11 +384,21 @@ export function handleMockRequest(endpoint, options = {}) {
     return results.filter(r => r.studentId === currentUser.userId);
   }
 
-  // Results: Exam Results
+  // Results: Exam Results by Exam ID
   if (endpoint.startsWith('/results/exam/') && method === 'GET') {
     const examId = parseInt(endpoint.split('/')[3], 10);
     const results = getStoredResults();
     return results.filter(r => r.examId === examId);
+  }
+
+  // Results: Get result by numeric ID
+  const resultIdMatch = endpoint.match(/^\/results\/(\d+)$/);
+  if (resultIdMatch && method === 'GET') {
+    const resId = parseInt(resultIdMatch[1], 10);
+    const results = getStoredResults();
+    const found = results.find(r => r.id === resId);
+    if (!found) throw new Error('Result not found');
+    return found;
   }
 
   // Users: Get all
@@ -375,8 +406,35 @@ export function handleMockRequest(endpoint, options = {}) {
     return getStoredUsers();
   }
 
-  // Default fallback empty object/array
-  if (endpoint.startsWith('/results/')) return [];
+  // Users: Update user
+  const userIdMatch = endpoint.match(/^\/users\/(\d+)$/);
+  if (userIdMatch && method === 'PUT') {
+    const uId = parseInt(userIdMatch[1], 10);
+    const users = getStoredUsers();
+    const target = users.find(u => u.id === uId);
+    if (target) {
+      if (body.fullName) target.fullName = body.fullName;
+      if (body.role !== undefined) {
+        const roleMap = { 0: 'Admin', 1: 'Teacher', 2: 'Student' };
+        target.role = roleMap[body.role] || target.role;
+      }
+      saveStoredUsers(users);
+      return target;
+    }
+    throw new Error('User not found');
+  }
+
+  // Users: Delete user
+  if (userIdMatch && method === 'DELETE') {
+    const uId = parseInt(userIdMatch[1], 10);
+    let users = getStoredUsers();
+    users = users.filter(u => u.id !== uId);
+    saveStoredUsers(users);
+    return { message: 'User deleted successfully' };
+  }
+
+  // Fallback defaults
+  if (endpoint.startsWith('/results')) return [];
   if (endpoint.startsWith('/users')) return getStoredUsers();
   if (endpoint.startsWith('/exams')) return getStoredExams();
 

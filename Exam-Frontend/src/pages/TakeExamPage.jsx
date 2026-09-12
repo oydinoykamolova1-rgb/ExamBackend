@@ -140,7 +140,7 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
       {/* Questions List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {exam.questions.map((q, index) => {
-          const isMultiple = q.type === 'MultipleChoice';
+          const isMultiple = q.type === 'MultipleChoice' || q.type === 1;
           const currentSelected = selectedAnswers[q.id] || [];
 
           return (
