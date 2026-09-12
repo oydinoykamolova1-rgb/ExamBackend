@@ -112,41 +112,98 @@ export default function LoginPage({ onNavigateRegister }) {
         </form>
 
         {/* Quick Demo Login Section */}
-        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-subtle)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.75rem', textAlign: 'center' }}>
-            ⚡ Fast Demo 1-Click Login
+        <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color)' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-subtle)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.85rem', textAlign: 'center', letterSpacing: '0.5px' }}>
+            ⚡ Demo Hisoblar (1-Click Login)
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
-            <button 
-              type="button"
-              className="btn btn-secondary btn-sm"
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {/* Student */}
+            <div 
               onClick={() => handleDemoLogin('student@exam.com', 'Student123!')}
-              style={{ flexDirection: 'column', gap: '0.2rem', padding: '0.5rem 0.25rem' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-color)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--secondary)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
             >
-              <GraduationCap size={16} color="var(--secondary)" />
-              <span style={{ fontSize: '0.75rem' }}>Student</span>
-            </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <GraduationCap size={18} color="var(--secondary)" />
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>Student (Talaba)</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                    student@exam.com | Student123!
+                  </div>
+                </div>
+              </div>
+              <span className="btn btn-secondary btn-sm" style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}>Kirish</span>
+            </div>
 
-            <button 
-              type="button"
-              className="btn btn-secondary btn-sm"
+            {/* Teacher */}
+            <div 
               onClick={() => handleDemoLogin('teacher@exam.com', 'Teacher123!')}
-              style={{ flexDirection: 'column', gap: '0.2rem', padding: '0.5rem 0.25rem' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-color)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
             >
-              <User size={16} color="var(--primary)" />
-              <span style={{ fontSize: '0.75rem' }}>Teacher</span>
-            </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <User size={18} color="var(--primary)" />
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>Teacher (O'qituvchi)</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                    teacher@exam.com | Teacher123!
+                  </div>
+                </div>
+              </div>
+              <span className="btn btn-secondary btn-sm" style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}>Kirish</span>
+            </div>
 
-            <button 
-              type="button"
-              className="btn btn-secondary btn-sm"
+            {/* Admin */}
+            <div 
               onClick={() => handleDemoLogin('admin@exam.com', 'Admin123!')}
-              style={{ flexDirection: 'column', gap: '0.2rem', padding: '0.5rem 0.25rem' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-color)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--warning)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
             >
-              <Shield size={16} color="var(--warning)" />
-              <span style={{ fontSize: '0.75rem' }}>Admin</span>
-            </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <Shield size={18} color="var(--warning)" />
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>Admin</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                    admin@exam.com | Admin123!
+                  </div>
+                </div>
+              </div>
+              <span className="btn btn-secondary btn-sm" style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}>Kirish</span>
+            </div>
           </div>
         </div>
 
