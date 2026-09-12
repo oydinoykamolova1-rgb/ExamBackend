@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { fetchExamByIdApi } from '../api/exams';
 import { submitExamApi } from '../api/results';
 import TimerBadge from '../components/TimerBadge';
-import { CheckCircle2, ArrowLeft, Send, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, Send, AlertTriangle, Layers, HelpCircle } from 'lucide-react';
 
 export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
   const [exam, setExam] = useState(null);
@@ -12,7 +12,6 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
   
   // Selected answers state: { questionId: [selectedAnswerId1, selectedAnswerId2] }
   const [selectedAnswers, setSelectedAnswers] = useState({});
-
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
 
   useEffect(() => {
@@ -52,7 +51,6 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
           return { ...prev, [questionId]: [...current, answerId] };
         }
       } else {
-        // Single choice
         return { ...prev, [questionId]: [answerId] };
       }
     });
@@ -79,10 +77,17 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
     }
   }, [submitting, exam, selectedAnswers, onExamSubmitted]);
 
+  const scrollToQuestion = (index) => {
+    const elem = document.getElementById(`question-${index}`);
+    if (elem) {
+      elem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-muted)' }}>
-        Loading exam session...
+        <div className="animate-pulse-slow">Loading exam session & questions...</div>
       </div>
     );
   }
@@ -107,23 +112,23 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
   const progressPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
   return (
-    <div style={{ maxWidth: '900px', margin: '2rem auto', padding: '0 1.5rem' }}>
+    <div style={{ maxWidth: '960px', margin: '2rem auto', padding: '0 1.5rem' }} className="animate-fade-in-up">
       {/* Top Header Bar */}
-      <div className="glass-card" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+      <div className="glass-card" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', padding: '1.25rem 1.75rem' }}>
         <div>
-          <button className="btn btn-secondary btn-sm" onClick={onCancel} style={{ marginBottom: '0.5rem' }}>
-            <ArrowLeft size={14} /> Exit
+          <button className="btn btn-secondary btn-sm" onClick={onCancel} style={{ marginBottom: '0.6rem' }}>
+            <ArrowLeft size={14} /> Exit Session
           </button>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.01em' }}>
             {exam.title}
           </h2>
         </div>
 
         {/* Security & Timer */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           {tabSwitchCount > 0 && (
-            <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', padding: '0.45rem 0.85rem', borderRadius: 'var(--radius-md)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}>
-              <AlertTriangle size={15} />
+            <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', padding: '0.5rem 0.95rem', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}>
+              <AlertTriangle size={16} />
               <span>Tab Switch: {tabSwitchCount} Warning{tabSwitchCount > 1 ? 's' : ''}</span>
             </div>
           )}
@@ -135,61 +140,89 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="glass-card" style={{ marginBottom: '2rem', padding: '1rem 1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-          <span>Question Progress</span>
-          <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+      {/* Progress & Quick Navigation Bar */}
+      <div className="glass-card" style={{ marginBottom: '2rem', padding: '1.25rem 1.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}>
+            <Layers size={16} color="var(--primary)" />
+            Question Progress
+          </span>
+          <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>
             {answeredCount} of {totalQuestions} Answered ({Math.round(progressPercent)}%)
           </span>
         </div>
-        <div style={{ width: '100%', height: '8px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
-          <div style={{
-            width: `${progressPercent}%`,
-            height: '100%',
-            background: 'linear-gradient(90deg, #6366f1, #06b6d4)',
-            transition: 'width 0.3s ease'
-          }} />
+
+        <div className="progress-container" style={{ marginBottom: '1.25rem' }}>
+          <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }} />
+        </div>
+
+        {/* Quick Jump Buttons Grid */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
+          {exam.questions.map((q, idx) => {
+            const isAnswered = selectedAnswers[q.id] && selectedAnswers[q.id].length > 0;
+            return (
+              <button
+                key={q.id}
+                onClick={() => scrollToQuestion(idx)}
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  border: isAnswered ? '1px solid var(--primary)' : '1px solid var(--border-color)',
+                  background: isAnswered ? 'var(--grad-primary)' : 'rgba(255, 255, 255, 0.04)',
+                  color: isAnswered ? '#ffffff' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                title={`Jump to Q${idx + 1}`}
+              >
+                {idx + 1}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {error && (
-        <div style={{ background: 'var(--danger-bg)', color: '#f87171', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
-          {error}
+        <div style={{ background: 'var(--danger-bg)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+          ⚠️ {error}
         </div>
       )}
 
       {/* Questions List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
         {exam.questions.map((q, index) => {
           const isMultiple = q.type === 'MultipleChoice' || q.type === 1;
           const currentSelected = selectedAnswers[q.id] || [];
 
           return (
-            <div key={q.id} className="glass-card" style={{ padding: '1.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem', gap: '1rem' }}>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'baseline' }}>
+            <div key={q.id} id={`question-${index}`} className="glass-card" style={{ padding: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'baseline' }}>
                   <span style={{
                     background: 'var(--primary-light)',
-                    color: 'var(--primary)',
+                    color: '#a5b4fc',
+                    border: '1px solid var(--border-highlight)',
                     fontWeight: 800,
-                    padding: '0.25rem 0.6rem',
+                    padding: '0.3rem 0.75rem',
                     borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.85rem'
+                    fontSize: '0.88rem'
                   }}>
                     Q{index + 1}
                   </span>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.4 }}>
                     {q.text}
                   </h3>
                 </div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)', padding: '0.2rem 0.6rem', borderRadius: '9999px', whitespace: 'nowrap' }}>
+                <span className="badge badge-student" style={{ whitespace: 'nowrap' }}>
                   {q.points} pt{q.points > 1 ? 's' : ''} • {isMultiple ? 'Multiple Choice' : 'Single Choice'}
                 </span>
               </div>
 
               {/* Options */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {q.answers.map((ans) => {
                   const isChecked = currentSelected.includes(ans.id);
 
@@ -198,27 +231,41 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
                       key={ans.id}
                       onClick={() => handleSelectAnswer(q.id, ans.id, isMultiple)}
                       style={{
-                        padding: '0.85rem 1.1rem',
+                        padding: '1rem 1.25rem',
                         borderRadius: 'var(--radius-md)',
-                        background: isChecked ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                        border: `1px solid ${isChecked ? 'var(--primary)' : 'rgba(255, 255, 255, 0.06)'}`,
+                        background: isChecked ? 'rgba(99, 102, 241, 0.14)' : 'rgba(255, 255, 255, 0.03)',
+                        border: `1px solid ${isChecked ? 'var(--primary)' : 'rgba(255, 255, 255, 0.07)'}`,
+                        boxShadow: isChecked ? '0 0 16px rgba(99, 102, 241, 0.25)' : 'none',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.85rem',
-                        transition: 'all 0.15s ease'
+                        gap: '1rem',
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isChecked) {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.07)';
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isChecked) {
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
+                        }
                       }}
                     >
                       <div style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: isMultiple ? '4px' : '50%',
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: isMultiple ? '6px' : '50%',
                         border: `2px solid ${isChecked ? 'var(--primary)' : 'var(--text-subtle)'}`,
                         background: isChecked ? 'var(--primary)' : 'transparent',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        transition: 'all 0.15s ease'
+                        transition: 'all 0.2s ease',
+                        flexShrink: 0
                       }}>
                         {isChecked && (
                           <div style={{
@@ -229,7 +276,7 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
                           }} />
                         )}
                       </div>
-                      <span style={{ fontSize: '0.95rem', color: isChecked ? '#fff' : 'var(--text-main)', fontWeight: isChecked ? 600 : 400 }}>
+                      <span style={{ fontSize: '0.98rem', color: isChecked ? '#ffffff' : 'var(--text-main)', fontWeight: isChecked ? 600 : 400 }}>
                         {ans.text}
                       </span>
                     </div>
@@ -242,14 +289,14 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
       </div>
 
       {/* Submit Button */}
-      <div style={{ marginTop: '2.5rem', marginBottom: '4rem', textAlign: 'center' }}>
+      <div style={{ marginTop: '3rem', marginBottom: '5rem', textAlign: 'center' }}>
         <button 
           className="btn btn-primary btn-lg"
           onClick={handleSubmit}
           disabled={submitting}
-          style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}
+          style={{ padding: '1rem 3.5rem', fontSize: '1.15rem', boxShadow: '0 10px 30px rgba(99, 102, 241, 0.5)' }}
         >
-          <Send size={20} />
+          <Send size={22} />
           <span>{submitting ? 'Submitting Answers...' : 'Submit Final Exam'}</span>
         </button>
       </div>

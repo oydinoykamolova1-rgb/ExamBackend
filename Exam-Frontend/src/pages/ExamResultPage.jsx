@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
-import { CheckCircle, XCircle, Award, ArrowLeft, RotateCcw, Sparkles, ShieldCheck, BookOpen } from 'lucide-react';
+import { CheckCircle, XCircle, Award, ArrowLeft, RotateCcw, Sparkles, ShieldCheck, BookOpen, Target, Check, X } from 'lucide-react';
 import CertificateModal from '../components/CertificateModal';
 import { generateAIPerformanceFeedbackSkill } from '../api/aiSkillService';
 
@@ -9,11 +9,10 @@ export default function ExamResultPage({ result, onBackToExams }) {
 
   useEffect(() => {
     if (result && result.isPassed) {
-      // Fire confetti
       confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 }
+        particleCount: 140,
+        spread: 90,
+        origin: { y: 0.55 }
       });
     }
   }, [result]);
@@ -24,7 +23,7 @@ export default function ExamResultPage({ result, onBackToExams }) {
   const aiFeedback = generateAIPerformanceFeedbackSkill(result);
 
   return (
-    <div style={{ maxWidth: '850px', margin: '2rem auto', padding: '0 1.5rem' }}>
+    <div style={{ maxWidth: '900px', margin: '2.5rem auto 0 auto', padding: '0 1.5rem' }} className="animate-fade-in-up">
       {/* Certificate Modal */}
       {showCertificate && (
         <CertificateModal result={result} onClose={() => setShowCertificate(false)} />
@@ -33,45 +32,48 @@ export default function ExamResultPage({ result, onBackToExams }) {
       {/* Score Header Card */}
       <div className="glass-card" style={{
         textAlign: 'center',
-        padding: '3rem 2rem',
-        marginBottom: '2rem',
+        padding: '3.5rem 2rem',
+        marginBottom: '2.5rem',
         position: 'relative',
-        overflow: 'hidden'
+        border: `1px solid ${result.isPassed ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+        boxShadow: result.isPassed ? '0 20px 50px rgba(16, 185, 129, 0.2)' : '0 20px 50px rgba(239, 68, 68, 0.2)'
       }}>
         <div style={{
           position: 'absolute',
-          top: '-50px',
+          top: '-60px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '300px',
-          height: '150px',
-          background: result.isPassed ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-          filter: 'blur(50px)',
-          borderRadius: '50%'
+          width: '350px',
+          height: '180px',
+          background: result.isPassed ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+          filter: 'blur(60px)',
+          borderRadius: '50%',
+          pointerEvents: 'none'
         }} />
 
         <div style={{
-          width: '72px',
-          height: '72px',
+          width: '80px',
+          height: '80px',
           borderRadius: '50%',
           background: result.isPassed ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
           border: `2px solid ${result.isPassed ? 'var(--success)' : 'var(--danger)'}`,
+          boxShadow: result.isPassed ? '0 0 30px rgba(16, 185, 129, 0.4)' : '0 0 30px rgba(239, 68, 68, 0.4)',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: '1rem'
+          marginBottom: '1.25rem'
         }}>
           {result.isPassed ? (
-            <CheckCircle size={38} color="var(--success)" />
+            <CheckCircle size={44} color="var(--success)" />
           ) : (
-            <XCircle size={38} color="var(--danger)" />
+            <XCircle size={44} color="var(--danger)" />
           )}
         </div>
 
-        <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
-          {result.isPassed ? 'Congratulations! You Passed 🎉' : 'Exam Completed'}
+        <h1 style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
+          {result.isPassed ? 'Muvaffaqiyatli topshirildi! 🎉' : 'Imtihon Yakunlandi'}
         </h1>
-        <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '1rem' }}>
+        <p style={{ color: 'var(--text-muted)', marginTop: '0.4rem', fontSize: '1.05rem' }}>
           {result.examTitle || 'Exam Submission'}
         </p>
 
@@ -79,75 +81,78 @@ export default function ExamResultPage({ result, onBackToExams }) {
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '1.5rem',
-          margin: '2rem 0',
-          padding: '1rem 2rem',
-          background: 'rgba(255, 255, 255, 0.04)',
+          gap: '2rem',
+          margin: '2.25rem 0',
+          padding: '1.2rem 2.5rem',
+          background: 'rgba(15, 23, 42, 0.8)',
           borderRadius: 'var(--radius-xl)',
-          border: '1px solid var(--border-color)'
+          border: '1px solid var(--border-color)',
+          boxShadow: 'var(--shadow-md)',
+          flexWrap: 'wrap',
+          justifyContent: 'center'
         }}>
           <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', textTransform: 'uppercase' }}>Score Earned</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>To'plangan Ball</div>
+            <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--text-main)' }}>
               {result.score} / {result.totalPoints}
             </div>
           </div>
 
-          <div style={{ width: '1px', height: '40px', background: 'var(--border-color)' }} />
+          <div style={{ width: '1px', height: '42px', background: 'var(--border-color)' }} />
 
           <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', textTransform: 'uppercase' }}>Percentage</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: result.isPassed ? 'var(--success)' : 'var(--danger)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Foiz Ko'rsatkichi</div>
+            <div style={{ fontSize: '1.85rem', fontWeight: 800, color: result.isPassed ? 'var(--success)' : 'var(--danger)' }}>
               {result.percentage}%
             </div>
           </div>
 
-          <div style={{ width: '1px', height: '40px', background: 'var(--border-color)' }} />
+          <div style={{ width: '1px', height: '42px', background: 'var(--border-color)' }} />
 
           <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', textTransform: 'uppercase' }}>Result</div>
-            <span className={`badge ${result.isPassed ? 'badge-pass' : 'badge-fail'}`} style={{ marginTop: '4px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Holat</div>
+            <span className={`badge ${result.isPassed ? 'badge-pass' : 'badge-fail'}`} style={{ marginTop: '6px', padding: '0.35rem 0.85rem', fontSize: '0.8rem' }}>
               {result.isPassed ? 'PASSED' : 'FAILED'}
             </span>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary" onClick={onBackToExams}>
-            <ArrowLeft size={18} />
-            <span>Return to Dashboard</span>
+          <button className="btn btn-primary btn-lg" onClick={onBackToExams}>
+            <ArrowLeft size={20} />
+            <span>Bosh Sahifaga Qaytish</span>
           </button>
 
           {result.isPassed && (
             <button 
-              className="btn btn-secondary" 
+              className="btn btn-gold btn-lg" 
               onClick={() => setShowCertificate(true)}
-              style={{ background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(202, 138, 4, 0.2))', border: '1px solid rgba(234, 179, 8, 0.5)', color: '#fbbf24' }}
             >
-              <Award size={18} />
-              <span>📜 Rasmiy Sertifikatni Ko'rish / Yuklash</span>
+              <Award size={20} />
+              <span>📜 Sertifikatni Ko'rish / Chop etish</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Gemini AI Performance Skill Feedback */}
-      <div className="glass-card" style={{ marginBottom: '2rem', border: '1px solid rgba(99, 102, 241, 0.3)', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.05) 100%)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#a855f7', fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          <Sparkles size={18} /> 🤖 AI O'quv Murabbiyi Maslahati (Gemini Skill)
+      {/* Gemini AI Performance Feedback */}
+      <div className="glass-card" style={{ marginBottom: '2.5rem', border: '1px solid rgba(99, 102, 241, 0.4)', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)', padding: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#c084fc', fontWeight: 800, fontSize: '0.88rem', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <Sparkles size={18} />
+          <span>🤖 AI O'quv Tahlili va Maslahatlari</span>
         </div>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.3rem' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
           {aiFeedback.status}
         </h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '1rem' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.96rem', marginBottom: '1.25rem' }}>
           {aiFeedback.summary}
         </p>
 
-        <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-            🎯 Rivojlanish uchun Tavsiyalar:
+        <div style={{ background: 'rgba(11, 16, 28, 0.75)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.6rem' }}>
+            🎯 Rivojlanish va takomillashtirish yo'nalishlari:
           </div>
-          <ul style={{ paddingLeft: '1.2rem', margin: 0, color: 'var(--text-muted)', fontSize: '0.88rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <ul style={{ paddingLeft: '1.25rem', margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             {aiFeedback.recommendations.map((rec, idx) => (
               <li key={idx}>{rec}</li>
             ))}
@@ -157,31 +162,35 @@ export default function ExamResultPage({ result, onBackToExams }) {
 
       {/* Detailed Analysis */}
       {details.length > 0 && (
-        <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1rem' }}>
-            Detailed Question Breakdown
+        <div style={{ marginBottom: '4rem' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
+            Savollar Tahlili va Natijasi
           </h2>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {details.map((item, index) => (
               <div key={index} className="glass-card" style={{
-                borderLeft: `4px solid ${item.IsCorrect ? 'var(--success)' : 'var(--danger)'}`,
-                padding: '1.25rem 1.5rem'
+                borderLeft: `5px solid ${item.IsCorrect ? 'var(--success)' : 'var(--danger)'}`,
+                padding: '1.5rem 1.75rem'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                    Question {index + 1}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {item.IsCorrect ? <Check size={16} color="var(--success)" /> : <X size={16} color="var(--danger)" />}
+                    Savol {index + 1}
                   </span>
                   <span style={{
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    color: item.IsCorrect ? 'var(--success)' : 'var(--danger)'
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    color: item.IsCorrect ? 'var(--success)' : 'var(--danger)',
+                    background: item.IsCorrect ? 'var(--success-bg)' : 'var(--danger-bg)',
+                    padding: '0.2rem 0.65rem',
+                    borderRadius: '9999px'
                   }}>
-                    {item.PointsEarned} / {item.TotalQuestionPoints} pts ({item.IsCorrect ? 'Correct' : 'Incorrect'})
+                    {item.PointsEarned} / {item.TotalQuestionPoints} ball ({item.IsCorrect ? 'Tog\'ri' : 'Noto\'g\'ri'})
                   </span>
                 </div>
 
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.5 }}>
                   {item.QuestionText}
                 </p>
               </div>

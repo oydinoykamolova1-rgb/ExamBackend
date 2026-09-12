@@ -193,26 +193,41 @@ export default function TeacherDashboard() {
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '2rem auto', padding: '0 1.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+    <div style={{ maxWidth: '1200px', margin: '2.5rem auto 0 auto', padding: '0 1.5rem' }} className="animate-fade-in-up">
+      {/* Studio Header Banner */}
+      <div className="glass-card" style={{
+        padding: '2.25rem 2.5rem',
+        marginBottom: '2.5rem',
+        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)',
+        border: '1px solid rgba(99, 102, 241, 0.25)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1.5rem'
+      }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(99, 102, 241, 0.2)', padding: '0.3rem 0.8rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 700, color: '#a5b4fc', marginBottom: '0.75rem' }}>
+            <Sparkles size={14} color="var(--primary)" />
+            <span>TEACHER MANAGEMENT STUDIO</span>
+          </div>
+          <h1 style={{ fontSize: '2.25rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
             Teacher Exam Studio
           </h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Create exams, manage questions, and view student submissions.
+          <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.35rem' }}>
+            Create new examinations, manage question banks, trigger AI question generator, and evaluate student submissions.
           </p>
         </div>
 
-        <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-          <PlusCircle size={18} />
-          <span>Create New Exam</span>
+        <button className="btn btn-primary btn-lg" onClick={() => setIsCreateModalOpen(true)}>
+          <PlusCircle size={20} />
+          <span>Yangi Imtihon Yaratish</span>
         </button>
       </div>
 
       {error && (
-        <div style={{ background: 'var(--danger-bg)', color: '#f87171', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
-          {error}
+        <div style={{ background: 'var(--danger-bg)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', marginBottom: '2rem' }}>
+          ⚠️ {error}
         </div>
       )}
 
