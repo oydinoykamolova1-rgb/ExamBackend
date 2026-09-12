@@ -3,11 +3,13 @@ import { fetchMyCreatedExamsApi, createExamApi, deleteExamApi, fetchExamByIdApi 
 import { addQuestionApi, deleteQuestionApi } from '../api/questions';
 import { fetchExamResultsApi } from '../api/results';
 import Modal from '../components/Modal';
-import { PlusCircle, Trash2, HelpCircle, Eye, Users, FileText, Check, X } from 'lucide-react';
+import { PlusCircle, Trash2, HelpCircle, Eye, Users, FileText, Check, X, Sparkles, Wand2 } from 'lucide-react';
+import { generateAIQuestionsSkill } from '../api/aiSkillService';
 
 export default function TeacherDashboard() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generatingAI, setGeneratingAI] = useState(false);
   const [error, setError] = useState('');
 
   // Create Exam Modal State
@@ -152,6 +154,29 @@ export default function TeacherDashboard() {
       loadMyExams();
     } catch (err) {
       alert(err.message || 'Failed to delete question.');
+    }
+  };
+
+  const handleGenerateAIQuestions = async () => {
+    if (!selectedExam) return;
+    setGeneratingAI(true);
+    try {
+      const generated = await generateAIQuestionsSkill(selectedExam.title, 3);
+      for (const q of generated) {
+        await addQuestionApi({
+          examId: selectedExam.id,
+          text: q.text,
+          points: q.points,
+          type: q.type,
+          answers: q.answers
+        });
+      }
+      await openQuestionsModal(selectedExam.id);
+      loadMyExams();
+    } catch (err) {
+      alert(err.message || 'AI Question Generation failed.');
+    } finally {
+      setGeneratingAI(false);
     }
   };
 
@@ -325,6 +350,29 @@ export default function TeacherDashboard() {
       >
         {selectedExam && (
           <div>
+            {/* Gemini AI Question Generator Skill Banner */}
+            <div style={{ background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%)', border: '1px solid rgba(168, 85, 247, 0.4)', borderRadius: 'var(--radius-md)', padding: '0.85rem 1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#a855f7', fontWeight: 800, fontSize: '0.85rem' }}>
+                  <Sparkles size={16} /> Gemini AI Skill Generator
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                  Avtomatik tarzda ushbu imtihonga mos 3 ta yangi professional savollar yaratadi
+                </div>
+              </div>
+
+              <button 
+                type="button" 
+                className="btn btn-secondary btn-sm" 
+                onClick={handleGenerateAIQuestions}
+                disabled={generatingAI}
+                style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)', color: '#fff', border: 'none', whiteSpace: 'nowrap', padding: '0.4rem 0.85rem' }}
+              >
+                <Wand2 size={15} />
+                <span>{generatingAI ? 'AI Yaratmoqda...' : '⚡ AI Savol Yaratish'}</span>
+              </button>
+            </div>
+
             {/* Existing Questions List */}
             {selectedExam.questions.length > 0 && (
               <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>

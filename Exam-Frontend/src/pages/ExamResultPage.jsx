@@ -1,14 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
-import { CheckCircle, XCircle, Award, ArrowLeft, RotateCcw } from 'lucide-react';
+import { CheckCircle, XCircle, Award, ArrowLeft, RotateCcw, Sparkles, ShieldCheck, BookOpen } from 'lucide-react';
+import CertificateModal from '../components/CertificateModal';
+import { generateAIPerformanceFeedbackSkill } from '../api/aiSkillService';
 
 export default function ExamResultPage({ result, onBackToExams }) {
+  const [showCertificate, setShowCertificate] = useState(false);
+
   useEffect(() => {
     if (result && result.isPassed) {
       // Fire confetti
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 120,
+        spread: 80,
         origin: { y: 0.6 }
       });
     }
@@ -17,9 +21,15 @@ export default function ExamResultPage({ result, onBackToExams }) {
   if (!result) return null;
 
   const details = result.detailsJson ? JSON.parse(result.detailsJson) : [];
+  const aiFeedback = generateAIPerformanceFeedbackSkill(result);
 
   return (
     <div style={{ maxWidth: '850px', margin: '2rem auto', padding: '0 1.5rem' }}>
+      {/* Certificate Modal */}
+      {showCertificate && (
+        <CertificateModal result={result} onClose={() => setShowCertificate(false)} />
+      )}
+
       {/* Score Header Card */}
       <div className="glass-card" style={{
         textAlign: 'center',
@@ -102,11 +112,46 @@ export default function ExamResultPage({ result, onBackToExams }) {
           </div>
         </div>
 
-        <div>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-primary" onClick={onBackToExams}>
             <ArrowLeft size={18} />
             <span>Return to Dashboard</span>
           </button>
+
+          {result.isPassed && (
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => setShowCertificate(true)}
+              style={{ background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(202, 138, 4, 0.2))', border: '1px solid rgba(234, 179, 8, 0.5)', color: '#fbbf24' }}
+            >
+              <Award size={18} />
+              <span>📜 Rasmiy Sertifikatni Ko'rish / Yuklash</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Gemini AI Performance Skill Feedback */}
+      <div className="glass-card" style={{ marginBottom: '2rem', border: '1px solid rgba(99, 102, 241, 0.3)', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.05) 100%)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#a855f7', fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <Sparkles size={18} /> 🤖 AI O'quv Murabbiyi Maslahati (Gemini Skill)
+        </div>
+        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.3rem' }}>
+          {aiFeedback.status}
+        </h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '1rem' }}>
+          {aiFeedback.summary}
+        </p>
+
+        <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+            🎯 Rivojlanish uchun Tavsiyalar:
+          </div>
+          <ul style={{ paddingLeft: '1.2rem', margin: 0, color: 'var(--text-muted)', fontSize: '0.88rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            {aiFeedback.recommendations.map((rec, idx) => (
+              <li key={idx}>{rec}</li>
+            ))}
+          </ul>
         </div>
       </div>
 
@@ -114,7 +159,7 @@ export default function ExamResultPage({ result, onBackToExams }) {
       {details.length > 0 && (
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1rem' }}>
-            Detailed Breakdown
+            Detailed Question Breakdown
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { fetchMyResultsApi } from '../api/results';
-import { Award, Calendar, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
+import { Award, Calendar, CheckCircle, XCircle, ChevronRight, ShieldCheck } from 'lucide-react';
+import CertificateModal from '../components/CertificateModal';
 
 export default function MyResultsPage({ onViewResultDetails }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedCertResult, setSelectedCertResult] = useState(null);
 
   useEffect(() => {
     loadResults();
@@ -25,12 +27,16 @@ export default function MyResultsPage({ onViewResultDetails }) {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '2rem auto', padding: '0 1.5rem' }}>
+      {selectedCertResult && (
+        <CertificateModal result={selectedCertResult} onClose={() => setSelectedCertResult(null)} />
+      )}
+
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)' }}>
           My Exam Results & History
         </h1>
         <p style={{ color: 'var(--text-muted)' }}>
-          Review your past test scores and performance feedback.
+          Review your past test scores, official certificates, and performance feedback.
         </p>
       </div>
 
@@ -65,9 +71,11 @@ export default function MyResultsPage({ onViewResultDetails }) {
                 padding: '1.25rem 1.75rem',
                 cursor: 'pointer'
               }}
-              onClick={() => onViewResultDetails(res)}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+              <div 
+                style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flex: 1 }}
+                onClick={() => onViewResultDetails(res)}
+              >
                 <div style={{
                   width: '44px',
                   height: '44px',
@@ -91,8 +99,8 @@ export default function MyResultsPage({ onViewResultDetails }) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                <div style={{ textAlign: 'right' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div style={{ textAlign: 'right' }} onClick={() => onViewResultDetails(res)}>
                   <div style={{ fontSize: '1.1rem', fontWeight: 800, color: res.isPassed ? 'var(--success)' : 'var(--danger)' }}>
                     {res.percentage}%
                   </div>
@@ -101,11 +109,26 @@ export default function MyResultsPage({ onViewResultDetails }) {
                   </div>
                 </div>
 
-                <span className={`badge ${res.isPassed ? 'badge-pass' : 'badge-fail'}`}>
+                <span className={`badge ${res.isPassed ? 'badge-pass' : 'badge-fail'}`} onClick={() => onViewResultDetails(res)}>
                   {res.isPassed ? 'PASSED' : 'FAILED'}
                 </span>
 
-                <ChevronRight size={18} color="var(--text-subtle)" />
+                {res.isPassed && (
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCertResult(res);
+                    }}
+                    style={{ background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.4)', color: '#fbbf24', padding: '0.35rem 0.65rem' }}
+                    title="Rasmiy Sertifikatni Ko'rish"
+                  >
+                    <Award size={15} />
+                    <span>Sertifikat</span>
+                  </button>
+                )}
+
+                <ChevronRight size={18} color="var(--text-subtle)" onClick={() => onViewResultDetails(res)} />
               </div>
             </div>
           ))}

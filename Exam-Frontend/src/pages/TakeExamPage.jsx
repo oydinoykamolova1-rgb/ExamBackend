@@ -13,9 +13,22 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
   // Selected answers state: { questionId: [selectedAnswerId1, selectedAnswerId2] }
   const [selectedAnswers, setSelectedAnswers] = useState({});
 
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+
   useEffect(() => {
     loadExam();
   }, [examId]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && !submitting && loading === false) {
+        setTabSwitchCount((prev) => prev + 1);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [submitting, loading]);
 
   const loadExam = async () => {
     setLoading(true);
@@ -106,11 +119,20 @@ export default function TakeExamPage({ examId, onCancel, onExamSubmitted }) {
           </h2>
         </div>
 
-        {/* Timer */}
-        <TimerBadge 
-          durationMinutes={exam.durationMinutes} 
-          onTimeUp={handleSubmit} 
-        />
+        {/* Security & Timer */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {tabSwitchCount > 0 && (
+            <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', padding: '0.45rem 0.85rem', borderRadius: 'var(--radius-md)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}>
+              <AlertTriangle size={15} />
+              <span>Tab Switch: {tabSwitchCount} Warning{tabSwitchCount > 1 ? 's' : ''}</span>
+            </div>
+          )}
+
+          <TimerBadge 
+            durationMinutes={exam.durationMinutes} 
+            onTimeUp={handleSubmit} 
+          />
+        </div>
       </div>
 
       {/* Progress Bar */}
