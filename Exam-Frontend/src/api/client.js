@@ -25,10 +25,17 @@ export async function request(endpoint, options = {}) {
 
   try {
     const response = await fetch(`${BASE_URL}${endpoint}`, config);
+    const contentType = response.headers.get('content-type') || '';
 
-    // If server returned 405 Method Not Allowed or 404 Not Found (common on static hostings like Vercel without API server)
-    if (response.status === 405 || response.status === 404 || response.status === 502 || response.status === 503) {
-      console.warn(`[API Client] Server returned ${response.status} for ${endpoint}. Falling back to client-side Mock Engine.`);
+    // If server returned HTML (e.g. Vercel static rewrite to index.html) or error status
+    if (
+      contentType.includes('text/html') ||
+      response.status === 405 ||
+      response.status === 404 ||
+      response.status === 502 ||
+      response.status === 503
+    ) {
+      console.warn(`[API Client] Static server returned HTML/Status ${response.status} for ${endpoint}. Falling back to client-side Mock Engine.`);
       return handleMockRequest(endpoint, config);
     }
 
@@ -48,14 +55,24 @@ export async function request(endpoint, options = {}) {
       return null;
     }
 
-    return response.json();
+    // Try parsing JSON; if text/html was returned, catch block will intercept SyntaxError
+    const data = await response.json();
+    return data;
   } catch (error) {
-    // Catch fetch/network errors (e.g. backend server offline or CORS) and fallback to mock
-    if (error.name === 'TypeError' || error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-      console.warn(`[API Client] Network error connecting to ${BASE_URL}${endpoint}. Falling back to client-side Mock Engine.`, error);
+    // Catch fetch/network errors or JSON syntax errors (e.g. HTML returned as 200 OK)
+    if (
+      error.name === 'SyntaxError' ||
+      error.name === 'TypeError' ||
+      error.message.includes('JSON') ||
+      error.message.includes('Unexpected token') ||
+      error.message.includes('fetch') ||
+      error.message.includes('Failed to fetch')
+    ) {
+      console.warn(`[API Client] Non-JSON or Network error for ${endpoint}. Falling back to client-side Mock Engine.`, error);
       return handleMockRequest(endpoint, config);
     }
     throw error;
   }
 }
+
 
